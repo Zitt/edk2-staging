@@ -1,7 +1,7 @@
 /** @file
   Implementation of Script Engine Protocol of MicroPython.
 
-Copyright (c) 2018, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2018-2021, Intel Corporation. All rights reserved.<BR>
 This program and the accompanying materials
 are licensed and made available under the terms and conditions of the BSD License
 which accompanies this distribution.  The full text of the license may be found at
@@ -162,7 +162,7 @@ STATIC int execute_from_lexer(mp_lexer_t *lex, mp_parse_input_kind_t input_kind,
     mp_parse_node_print(parse_tree.root, 0);
 #endif
 
-    mp_obj_t module_fun = mp_compile(&parse_tree, source_name, MP_EMIT_OPT_NONE, is_repl);
+    mp_obj_t module_fun = mp_compile(&parse_tree, source_name, /*MP_EMIT_OPT_NONE,*/ is_repl);
 
     // execute it
     mp_call_function_0(module_fun);

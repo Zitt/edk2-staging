@@ -249,7 +249,7 @@
   $(ONIGURUMA_PATH)/utf8.c
 
 [Sources.X64]
-  $(MICROPYTHON_OVERRIDE)/py/X64/emitnx64.c
+  $(MICROPYTHON_OVERRIDE)/py/X64/emitnx64.c 
   $(MICROPYTHON_OVERRIDE)/py/X64/asmx64.c
   $(MICROPYTHON_OVERRIDE)/py/X64/nlrsetjmp.nasm
 

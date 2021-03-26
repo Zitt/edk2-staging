@@ -1,7 +1,7 @@
 /** @file
   Configuration file for MicroPython on UEFI.
 
-Copyright (c) 2017 - 2018, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2017 - 2021, Intel Corporation. All rights reserved.<BR>
 This program and the accompanying materials
 are licensed and made available under the terms and conditions of the BSD License
 which accompanies this distribution.  The full text of the license may be found at
@@ -166,7 +166,7 @@ extern const struct _mp_obj_module_t mp_module__re;
 
 #define MICROPY_PORT_BUILTIN_MODULES \
     { MP_OBJ_NEW_QSTR(MP_QSTR_uos), (mp_obj_t)&mp_module_os }, \
-    { MP_OBJ_NEW_QSTR(MP_QSTR_array), (mp_obj_t)&mp_module_array }, \
+    { MP_OBJ_NEW_QSTR(MP_QSTR_array), (mp_obj_t)&mp_module_uarray }, \
     { MP_OBJ_NEW_QSTR(MP_QSTR_ure), (mp_obj_t)&mp_module_ure }, \
     { MP_OBJ_NEW_QSTR(MP_QSTR_umachine), (mp_obj_t)&mp_module_machine }, \
     { MP_OBJ_NEW_QSTR(MP_QSTR_utime), (mp_obj_t)&mp_module_time }, \
