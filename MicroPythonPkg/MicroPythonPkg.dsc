@@ -37,6 +37,7 @@
   PrintLib|MdePkg/Library/BasePrintLib/BasePrintLib.inf
   IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
   SortLib|MdeModulePkg/Library/UefiSortLib/UefiSortLib.inf
+  ShellLib|ShellPkg/Library/UefiShellLib/UefiShellLib.inf
   #
   # UEFI & PI
   #

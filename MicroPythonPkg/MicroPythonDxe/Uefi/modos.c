@@ -1,7 +1,7 @@
 /** @file
   Edk2 version of os module for MicroPythhon.
 
-Copyright (c) 2018, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2018-2021, Intel Corporation. All rights reserved.<BR>
 This program and the accompanying materials
 are licensed and made available under the terms and conditions of the BSD License
 which accompanies this distribution.  The full text of the license may be found at
@@ -25,6 +25,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Guid/FileInfo.h>
 #include <Guid/FileSystemInfo.h>
 
+#include <Library/UefiLib.h>
+#include <Library/PrintLib.h>
+
 #include <unistd.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -45,8 +48,24 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include "objuefi.h"
 #include "upy.h"
 
+#define S_IFMT 0170000   /*bit mask for the file type bit field*/
 #define FILE_TYPE_DIR     0x4000
 #define FILE_TYPE_FILE    0x8000
+
+#define S_IRWXO  00007   /*others (not in group) have read, write, and execute permission*/
+#define S_IROTH  00004   /*others have read permission*/
+#define S_IWOTH  00002   /*others have write permission*/
+#define S_IXOTH  00001   /*others have execute permission*/
+
+#define S_IRWXU (S_IRWXO << 6) /*owner has read, write, and execute permission*/
+#define S_IRUSR (S_IROTH << 6) /*owner has read permission*/
+#define S_IWUSR (S_IWOTH << 6) /*owner has write permission*/
+#define S_IXUSR (S_IXOTH << 6) /*owner has execute permission */
+
+#define S_IRWXG (S_IRWXO << 3) /*group has read, write, and execute permission*/
+#define S_IRGRP (S_IRWXO << 3) /*group has read permission*/
+#define S_IWGRP (S_IRWXO << 3) /*group has write permission*/
+#define S_IXGRP (S_IRWXO << 3) /*group has execute permission*/
 
 typedef struct _mp_obj_listdir_t {
     mp_obj_base_t     base;
@@ -285,7 +304,7 @@ STATIC mp_obj_t mod_os_stat (mp_obj_t path)
   UINTN                         len;
   EFI_FILE_HANDLE               fh;
   EFI_FILE_INFO                 *info;
-  mp_obj_stat_result_t          *stat;
+  mp_obj_stat_result_t          *stat = NULL;
 
   fh        = NULL;
   info      = NULL;
@@ -302,15 +321,37 @@ STATIC mp_obj_t mod_os_stat (mp_obj_t path)
   path_uni  = Utf8ToUnicode (path_asc, NULL, &len, FALSE);
   status    = sfp->Open (sfp, path_uni, EFI_FILE_MODE_READ, 0, &fh);
   if (status != EFI_SUCCESS) {
+    AsciiPrint( "%s %d failed %r @ln%d\n", path_uni, EFI_FILE_MODE_READ, status, __LINE__ );
+    switch (status) {
+     case EFI_ACCESS_DENIED: mp_raise_OSError( EACCES ); break;
+     case EFI_INVALID_PARAMETER: mp_raise_OSError( EINVAL ); break;
+     case EFI_DEVICE_ERROR: mp_raise_OSError( EIO ); break;
+     case EFI_NOT_FOUND: 
+     default: mp_raise_OSError( ENOENT );
+              break;
+    }
     goto Exit;
   }
 
   info = FileHandleGetInfo(fh);
-  if (info != NULL) {
+  if (info == NULL) {
+   AsciiPrint( "FileHandleGetInfo()== null @ln%d\n", __LINE__ );
+  } else if (info != NULL) {
     stat = m_new_obj(mp_obj_stat_result_t);
 
     stat->base.type = &mp_type_stat_result;
     stat->st_mode   = info->Attribute;
+    if (info->Attribute & EFI_FILE_DIRECTORY) {
+     stat->st_mode |= FILE_TYPE_DIR;
+    } else {
+     stat->st_mode |= FILE_TYPE_FILE;
+    }
+    stat->st_mode &= S_IFMT;
+    
+    stat->st_mode |= ( S_IRWXU | S_IRWXG | S_IRWXO); //set that everyone has permission   
+    
+    if (info->Attribute & EFI_FILE_READ_ONLY) stat->st_mode ^= (S_IWUSR | S_IWGRP | S_IWOTH);
+    
     stat->st_ino    = 0;
     stat->st_dev    = 0;
     stat->st_nlink  = 0;

@@ -89,6 +89,14 @@
   # Build all the libraries when building this package.
   # This helps developers test changes and how they affect the package.
   #
+  ShellPkg/Application/md5sum/md5sum.inf {
+    <LibraryClasses>
+     OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLibCrypto.inf
+     IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+     BaseCryptLib|CryptoPkg/Library/BaseCryptLib/BaseCryptLib.inf
+     #
+     #BaseCryptLib|CryptoPkg/Library/BaseCryptLibRuntimeCryptProtocol/BaseCryptLibRuntimeCryptProtocol.inf
+  }
   ShellPkg/Library/UefiShellLib/UefiShellLib.inf
   ShellPkg/Library/UefiShellCommandLib/UefiShellCommandLib.inf
   ShellPkg/Library/UefiShellCEntryLib/UefiShellCEntryLib.inf
