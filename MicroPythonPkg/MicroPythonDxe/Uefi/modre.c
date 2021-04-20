@@ -50,9 +50,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/MemoryAllocationLib.h>
 #include <Library/BaseMemoryLib.h>
 
-#include <Library/UefiLib.h>
-#include <Library/PrintLib.h>
-
 #include "upy.h"
 #include "onigurumaglue.h"
 
@@ -90,8 +87,6 @@ string_scan_callback (
   CONST CHAR8   *match;
   split_data_t  *splitdata;
 
-  AsciiPrint("%a %a() ln%d\n", __FILE__, __FUNCTION__, __LINE__);
-
   splitdata = data;
   if (splitdata->max_split > 0 && num >= splitdata->max_split) {
     return 1;
@@ -124,8 +119,6 @@ STATIC void match_print (const mp_print_t *print, mp_obj_t self_in, mp_print_kin
 
 STATIC mp_obj_t match_group (mp_obj_t self_in, mp_obj_t no_in)
 {
-  AsciiPrint("%a %a() ln%d\n", __FILE__, __FUNCTION__, __LINE__);
-
   mp_obj_match_t  *self = MP_OBJ_TO_PTR(self_in);
   mp_int_t        no = mp_obj_get_int(no_in);
 
@@ -138,24 +131,6 @@ STATIC mp_obj_t match_group (mp_obj_t self_in, mp_obj_t no_in)
                                 self->caps->end[no] - self->caps->beg[no]);
 }
 MP_DEFINE_CONST_FUN_OBJ_2 (uefi_match_group_obj, match_group);
-
-#if MICROPY_PY_URE_MATCH_GROUPS
-
-STATIC mp_obj_t match_groups(mp_obj_t self_in) {
-    AsciiPrint("%a %a() ln%d\n", __FILE__, __FUNCTION__, __LINE__);
-    mp_obj_match_t *self = MP_OBJ_TO_PTR(self_in);
-    if (self->caps->num_regs <= 1) {
-        return mp_const_empty_tuple;
-    }
-    mp_obj_tuple_t *groups = MP_OBJ_TO_PTR(mp_obj_new_tuple(self->caps->num_regs - 1, NULL));
-    for (int i = 1; i < self->caps->num_regs; ++i) {
-        groups->items[i - 1] = match_group(self_in, MP_OBJ_NEW_SMALL_INT(i));
-    }
-    return MP_OBJ_FROM_PTR(groups);
-}
-MP_DEFINE_CONST_FUN_OBJ_1(uefi_match_groups_obj, match_groups);
-
-#endif
 
 STATIC mp_obj_t match_del (mp_obj_t self_in)
 {
@@ -171,9 +146,6 @@ MP_DEFINE_CONST_FUN_OBJ_1(uefi_match_del_obj, match_del);
 STATIC const mp_rom_map_elem_t match_locals_dict_table[] = {
   { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&uefi_match_del_obj)},
   { MP_ROM_QSTR(MP_QSTR_group), MP_ROM_PTR(&uefi_match_group_obj)},
-#if MICROPY_PY_URE_MATCH_GROUPS
-  { MP_ROM_QSTR(MP_QSTR_groups), MP_ROM_PTR(&uefi_match_groups_obj)},
-#endif  
 };
 STATIC MP_DEFINE_CONST_DICT (match_locals_dict, match_locals_dict_table);
 
@@ -195,8 +167,6 @@ STATIC void re_print (const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t
 
 STATIC mp_obj_t re_match (size_t n_args, const mp_obj_t *args)
 {
-  AsciiPrint("%a %a() ln%d\n", __FILE__, __FUNCTION__, __LINE__);
-
   mp_obj_re_t     *self = MP_OBJ_TO_PTR(args[0]);
   const char      *string = mp_obj_str_get_str(args[1]);
   OnigRegion      *mregion;
@@ -294,7 +264,6 @@ STATIC const mp_obj_type_t re_type = {
 
 STATIC mp_obj_t uefi_mod_re_compile (size_t n_args, const mp_obj_t *args)
 {
-  AsciiPrint("%a %a() ln%d\n", __FILE__, __FUNCTION__, __LINE__);
   const char *re_str = mp_obj_str_get_str(args[0]);
   mp_obj_re_t *o = m_new_obj_with_finaliser(mp_obj_re_t);
 
@@ -322,8 +291,6 @@ STATIC mp_obj_t uefi_mod_re_match (size_t n_args, const mp_obj_t *args)
   regex_t               *regex;
   OnigRegion            *mregion;
   mp_obj_match_t        *mobj;
-
-  AsciiPrint("%a %a() ln%d\n", __FILE__, __FUNCTION__, __LINE__);
 
   const char *pattern = mp_obj_str_get_str(args[0]);
   const char *string = mp_obj_str_get_str(args[1]);

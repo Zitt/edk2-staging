@@ -1,7 +1,7 @@
 /** @file
   File object for MicroPython on EDK2/UEFI.
 
-Copyright (c) 2018-2021, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2018, Intel Corporation. All rights reserved.<BR>
 This program and the accompanying materials
 are licensed and made available under the terms and conditions of the BSD License
 which accompanies this distribution.  The full text of the license may be found at
@@ -28,8 +28,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/UefiBootServicesTableLib.h>
 #include <Protocol/ScriptEngineProtocol.h>
 
-#include <Library/UefiLib.h>
-#include <Library/PrintLib.h>
 #include "fdfile.h"
 #include "upy.h"
 
@@ -77,11 +75,7 @@ STATIC EFI_STATUS sfp_open(mp_obj_fdfile_t *self, const char *fname, UINT64 mode
       self->sfp = sfp;
 
       status = sfp->Map(sfp, fh, &self->fd);
-      if (status == EFI_NOT_FOUND) {
-       AsciiPrint("sfp->Map() returned %r (%r)\n", status, EFI_OUT_OF_RESOURCES);
-       status = EFI_OUT_OF_RESOURCES;
-       fh->Close(fh);
-      } else if (!EFI_ERROR(status)) {
+      if (!EFI_ERROR(status)) {
         info = FileHandleGetInfo(fh);
         //
         // open() should not operate on folders.
@@ -328,15 +322,7 @@ STATIC mp_obj_t fdfile_open(const mp_obj_type_t *type, mp_arg_val_t *args) {
   }
 
   if (EFI_ERROR(status)) {
-    AsciiPrint("Open(%a, %x) Failed: %r ln%d\n", mp_obj_str_get_str(args[0].u_obj), mode, status, __LINE__);
-    switch (status) {
-     case EFI_ACCESS_DENIED: mp_raise_OSError( EACCES ); break;
-     case EFI_INVALID_PARAMETER: mp_raise_OSError( EINVAL ); break;
-     case EFI_DEVICE_ERROR: mp_raise_OSError( EIO ); break;
-     case EFI_NOT_FOUND:
-     default: mp_raise_OSError( ENOENT );
-              break;
-    }
+    mp_raise_OSError(ENOENT);
   }
 
   if (o->fh) {

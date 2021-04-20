@@ -115,7 +115,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define MICROPY_PY_UZLIB                (1)
 #define MICROPY_PY_UJSON                (1)
 #define MICROPY_PY_URE                  (1)
-#define MICROPY_PY_URE_MATCH_GROUPS     (1)
 #define MICROPY_PY_UHEAPQ               (1)
 #define MICROPY_PY_UHASHLIB             (1)
 #define MICROPY_PY_UBINASCII            (1)
