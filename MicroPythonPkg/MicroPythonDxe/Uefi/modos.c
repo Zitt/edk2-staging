@@ -929,6 +929,57 @@ STATIC mp_obj_t mod_os_urandom (mp_obj_t n_in)
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1 (mod_os_urandom_obj, mod_os_urandom);
 
+STATIC mp_obj_t mod_os_tounicode (mp_obj_t astr)
+{
+  CONST CHAR8                   *path_asc;
+  CHAR16                        *path_uni;
+  UINTN                         len; 
+  mp_obj_t                      strobj;
+  
+  path_asc  = mp_obj_str_get_str(astr);
+  len       = strlen (path_asc);
+  path_uni  = Utf8ToUnicode (path_asc, NULL, &len, FALSE);
+  
+  strobj  =  mp_obj_new_str_of_type(&mp_type_bytes, (byte *)&path_uni[0], (size_t)len*sizeof(CHAR16));
+
+  FREE_NON_NULL(path_asc);
+  FREE_NON_NULL(path_uni);
+
+  return strobj;
+}
+
+STATIC MP_DEFINE_CONST_FUN_OBJ_1 (mp_os_tounicode_obj, mod_os_tounicode); 
+
+STATIC mp_obj_t mod_os_UnicodeToUtf8 (mp_obj_t astr)
+{
+  CONST CHAR16                  *astr_uni;
+  char                          *astr_utf8;
+  UINTN                         len;
+  
+  mp_obj_t                      strobj;
+  
+  //AsciiPrint("%a %a() ln%d\n", __FILE__, __FUNCTION__, __LINE__);
+
+  astr_uni = (CONST CHAR16 *) ((mp_obj_str_t*)astr)->data;
+  
+  //AsciiPrint("astr_uni=%s ln%d\n", astr_uni, __LINE__);
+  
+  len     = StrLen (astr_uni);
+  //AsciiPrint("len=%d ln%d\n", len, __LINE__);
+  astr_utf8 = UnicodeToUtf8 (astr_uni, NULL, &len);
+  //AsciiPrint("astr_utf8=%a ln%d\n", astr_utf8, __LINE__);
+  strobj  =  mp_obj_new_str(astr_utf8, (size_t)len);
+  
+  //AsciiPrint("strobj=%p ln%d\n", strobj, __LINE__);
+  
+  FREE_NON_NULL(astr_utf8);
+  
+  //AsciiPrint("returning from %a... ln%d\n", __FUNCTION__, __LINE__);
+
+  return strobj;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1 (mod_os_UnicodeToUtf8_obj, mod_os_UnicodeToUtf8 );
+
 
 STATIC const mp_obj_type_t mp_type_stat_result = {
     { &mp_type_type },
@@ -951,6 +1002,8 @@ STATIC const mp_rom_map_elem_t mp_module_os_globals_table[] = {
   { MP_ROM_QSTR(MP_QSTR_getcwd),    MP_ROM_PTR(&mod_os_getcwd_obj)},
   { MP_ROM_QSTR(MP_QSTR_uname),     MP_ROM_PTR(&mod_os_uname_obj)},
   { MP_ROM_QSTR(MP_QSTR_urandom),   MP_ROM_PTR(&mod_os_urandom_obj)},
+  { MP_ROM_QSTR(MP_QSTR_utf82unicode), MP_ROM_PTR(&mp_os_tounicode_obj)},
+  { MP_ROM_QSTR(MP_QSTR_unicode2utf8), MP_ROM_PTR(&mod_os_UnicodeToUtf8_obj)},
 };
 
 STATIC MP_DEFINE_CONST_DICT (mp_module_os_globals, mp_module_os_globals_table);
