@@ -1,7 +1,7 @@
 /** @file
   Oniguruma Regular Expression module for MicroPythhon.
 
-Copyright (c) 2018, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2018-2021, Intel Corporation. All rights reserved.<BR>
 This program and the accompanying materials
 are licensed and made available under the terms and conditions of the BSD License
 which accompanies this distribution.  The full text of the license may be found at
@@ -132,6 +132,23 @@ STATIC mp_obj_t match_group (mp_obj_t self_in, mp_obj_t no_in)
 }
 MP_DEFINE_CONST_FUN_OBJ_2 (uefi_match_group_obj, match_group);
 
+#if MICROPY_PY_URE_MATCH_GROUPS
+
+STATIC mp_obj_t match_groups(mp_obj_t self_in) {
+    mp_obj_match_t *self = MP_OBJ_TO_PTR(self_in);
+    if (self->caps->num_regs <= 1) {
+        return mp_const_empty_tuple;
+    }
+    mp_obj_tuple_t *groups = MP_OBJ_TO_PTR(mp_obj_new_tuple(self->caps->num_regs - 1, NULL));
+    for (int i = 1; i < self->caps->num_regs; ++i) {
+        groups->items[i - 1] = match_group(self_in, MP_OBJ_NEW_SMALL_INT(i));
+    }
+    return MP_OBJ_FROM_PTR(groups);
+}
+MP_DEFINE_CONST_FUN_OBJ_1(uefi_match_groups_obj, match_groups);
+
+#endif
+
 STATIC mp_obj_t match_del (mp_obj_t self_in)
 {
   mp_obj_match_t  *self = MP_OBJ_TO_PTR(self_in);
@@ -146,6 +163,9 @@ MP_DEFINE_CONST_FUN_OBJ_1(uefi_match_del_obj, match_del);
 STATIC const mp_rom_map_elem_t match_locals_dict_table[] = {
   { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&uefi_match_del_obj)},
   { MP_ROM_QSTR(MP_QSTR_group), MP_ROM_PTR(&uefi_match_group_obj)},
+#if MICROPY_PY_URE_MATCH_GROUPS
+  { MP_ROM_QSTR(MP_QSTR_groups), MP_ROM_PTR(&uefi_match_groups_obj)},
+#endif
 };
 STATIC MP_DEFINE_CONST_DICT (match_locals_dict, match_locals_dict_table);
 
