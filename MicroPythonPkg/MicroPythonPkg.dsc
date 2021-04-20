@@ -1,7 +1,7 @@
 ## @file
 # MicroPython Platform Definition File for build
 #
-# Copyright (c) 2018, Intel Corporation. All rights reserved.<BR>
+# Copyright (c) 2018-2021, Intel Corporation. All rights reserved.<BR>
 #
 #    This program and the accompanying materials
 #    are licensed and made available under the terms and conditions of the BSD License
@@ -37,6 +37,7 @@
   PrintLib|MdePkg/Library/BasePrintLib/BasePrintLib.inf
   IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
   SortLib|MdeModulePkg/Library/UefiSortLib/UefiSortLib.inf
+  ShellLib|ShellPkg/Library/UefiShellLib/UefiShellLib.inf
   #
   # UEFI & PI
   #

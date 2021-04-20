@@ -25,6 +25,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Guid/FileInfo.h>
 #include <Guid/FileSystemInfo.h>
 
+#include  <Library/ShellLib.h>
 
 #include <Library/UefiLib.h>
 #include <Library/PrintLib.h>
@@ -185,7 +186,7 @@ STATIC void stat_result_attr(mp_obj_t self_in, qstr attr, mp_obj_t *dest)
 
 STATIC mp_obj_t mod_os_system (mp_obj_t cmd_in)
 {
-  EFI_STATUS                    status;
+  EFI_STATUS                    status, CmdStat;
   EFI_SCRIPT_FILE_PROTOCOL      *sfp;
   EFI_LOADED_IMAGE_PROTOCOL     *imageinfo;
   EFI_DEVICE_PATH_PROTOCOL      *devpath;
@@ -206,6 +207,16 @@ STATIC mp_obj_t mod_os_system (mp_obj_t cmd_in)
   cmd_str = mp_obj_str_get_str(cmd_in);
   len     = strlen(cmd_str);
   cmd_uni = Utf8ToUnicode(cmd_str, NULL, &len, FALSE);
+  
+  image = gImageHandle;
+    
+  status = ShellExecute( &image, cmd_uni, FALSE, NULL, &CmdStat);
+  if ( !EFI_ERROR(status) ) {     
+     AsciiPrint("ShellExecute(%s) returned %r - final result is %r ln%d\n", cmd_uni, status, CmdStat, __LINE__);
+     status = CmdStat;
+     goto Exit;
+  } 
+    
   options = StrStr(cmd_uni, L".efi");
   if (options == NULL) {
     status = EFI_UNSUPPORTED;

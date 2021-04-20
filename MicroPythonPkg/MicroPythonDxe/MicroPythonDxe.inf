@@ -48,6 +48,7 @@
   SortLib
   DevicePathLib
   PrintLib
+  ShellLib
 
 [Pcd]
   gEfiShellPkgTokenSpaceGuid.PcdShellVendorExtendedDecode
